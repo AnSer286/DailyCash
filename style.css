@@ -1,0 +1,576 @@
+/* ============================================================
+   ПЕРЕМЕННЫЕ И БАЗА
+   ============================================================ */
+:root {
+  --navy-950: #04091a;
+  --navy-900: #071026;
+  --navy-800: #0b1a3a;
+  --navy-700: #122a52;
+  --navy-600: #1b3a6b;
+
+  --green-600: #15a34a;
+  --green-500: #22c55e;
+  --green-400: #4ade80;
+  --green-300: #86efac;
+
+  --gold-700: #8a6d0b;
+  --gold-600: #b8860b;
+  --gold-500: #d4a017;
+  --gold-400: #e8c34a;
+
+  --text: #e9f0ff;
+  --muted: #8ea6c9;
+  --line: rgba(140, 180, 255, .14);
+
+  --radius: 18px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100%;
+  min-height: 100dvh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+               Arial, "Noto Sans", sans-serif;
+  color: var(--text);
+  background-color: var(--navy-950);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Сложный фон ---------- */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(1200px 700px at 12% -10%, rgba(34, 197, 94, .16), transparent 60%),
+    radial-gradient(900px 620px at 96% 0%, rgba(212, 160, 23, .14), transparent 55%),
+    radial-gradient(1000px 800px at 50% 118%, rgba(27, 58, 107, .9), transparent 66%),
+    linear-gradient(165deg, #04091a 0%, #071026 42%, #050c1e 100%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(150, 200, 255, .045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(150, 200, 255, .045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 35%, #000 20%, transparent 85%);
+  mask-image: radial-gradient(ellipse at 50% 35%, #000 20%, transparent 85%);
+}
+
+/* ============================================================
+   КАРКАС
+   ============================================================ */
+.app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px calc(20px + env(safe-area-inset-bottom));
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 8px;
+}
+
+/* ---------- Топбар ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(14px + env(safe-area-inset-top)) 2px 8px;
+}
+
+.brand {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.icon-btn {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: rgba(18, 42, 82, .55);
+  color: var(--text);
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: background .2s, border-color .2s, transform .12s;
+}
+.icon-btn:hover {
+  background: rgba(27, 58, 107, .85);
+  border-color: rgba(140, 180, 255, .32);
+}
+.icon-btn:active { transform: scale(.93); }
+
+/* ============================================================
+   ВЕРХНЯЯ ЗОНА — БЮДЖЕТ НА СЕГОДНЯ
+   ============================================================ */
+.today-card {
+  position: relative;
+  margin-top: 8px;
+  padding: 24px 20px 22px;
+  border-radius: 26px;
+  text-align: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(18, 42, 82, .78), rgba(7, 16, 38, .82));
+  box-shadow:
+    0 22px 60px -28px rgba(0, 0, 0, .95),
+    inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+.today-card::after {
+  content: "";
+  position: absolute;
+  left: -25%;
+  right: -25%;
+  bottom: -95px;
+  height: 170px;
+  background: radial-gradient(ellipse at center, rgba(34, 197, 94, .26), transparent 70%);
+  pointer-events: none;
+}
+
+.today-date {
+  font-size: 12.5px;
+  letter-spacing: .05em;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.today-label {
+  margin-top: 16px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.today-amount {
+  position: relative;
+  margin-top: 6px;
+  font-size: clamp(40px, 13.5vw, 62px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+  color: #eafff2;
+  text-shadow: 0 0 46px rgba(34, 197, 94, .38);
+  overflow-wrap: anywhere;
+  transition: color .25s, text-shadow .25s;
+}
+
+.today-amount.is-negative {
+  color: var(--gold-400);
+  text-shadow: 0 0 46px rgba(212, 160, 23, .42);
+}
+
+.today-note {
+  position: relative;
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+  min-height: 17px;
+}
+
+/* Пульс при обновлении */
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.045); }
+  100% { transform: scale(1); }
+}
+.today-amount.pulse { animation: pulse .42s ease; }
+
+/* ============================================================
+   СРЕДНЯЯ ЗОНА — ВВОД
+   ============================================================ */
+.input-section {
+  margin-top: 18px;
+}
+
+.hint {
+  display: block;
+  margin: 0 3px 8px;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: .015em;
+  color: var(--muted);
+}
+.hint strong {
+  font-weight: 600;
+  color: var(--green-300);
+  font-variant-numeric: tabular-nums;
+}
+.hint strong.is-negative { color: var(--gold-400); }
+
+#spendForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.amount-input {
+  width: 100%;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  padding: 15px 18px;
+  background: #ffffff;
+  color: #061024;
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  box-shadow: 0 14px 34px -22px rgba(0, 0, 0, .95);
+  transition: border-color .18s, box-shadow .18s;
+}
+.amount-input::placeholder {
+  color: #9aa8bd;
+  font-size: 16px;
+  font-weight: 500;
+}
+.amount-input:focus {
+  border-color: var(--green-500);
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, .22),
+    0 14px 34px -22px rgba(0, 0, 0, .95);
+}
+
+.submit-btn {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 18px;
+  font-family: inherit;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: #04170c;
+  cursor: pointer;
+  background: linear-gradient(180deg, #3ddc7a 0%, var(--green-600) 100%);
+  box-shadow:
+    0 16px 34px -16px rgba(34, 197, 94, .75),
+    inset 0 1px 0 rgba(255, 255, 255, .38);
+  transition: filter .2s, transform .12s, box-shadow .2s;
+}
+.submit-btn:hover { filter: brightness(1.06); }
+.submit-btn:active {
+  transform: translateY(1px) scale(.995);
+  box-shadow: 0 8px 22px -16px rgba(34, 197, 94, .75);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-7px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(3px); }
+}
+.amount-input.shake {
+  animation: shake .38s ease;
+  border-color: var(--gold-500);
+}
+
+/* ============================================================
+   НИЖНЯЯ ЗОНА
+   ============================================================ */
+.bottom {
+  margin-top: 22px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat {
+  padding: 12px 14px;
+  border-radius: 15px;
+  border: 1px solid var(--line);
+  background: rgba(11, 26, 58, .58);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stat-value {
+  margin-top: 5px;
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.stat-value.is-negative { color: var(--gold-400); }
+.stat-value.is-accent   { color: var(--green-300); }
+
+/* ---------- Журнал трат ---------- */
+.log {
+  margin-top: 12px;
+  border-radius: 17px;
+  border: 1px solid var(--line);
+  background: rgba(11, 26, 58, .48);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.log-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 15px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.log-head span:last-child { color: var(--green-300); }
+
+.log-list {
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.log-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 15px;
+  border-top: 1px solid rgba(140, 180, 255, .08);
+  font-size: 15px;
+}
+
+.log-dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-500);
+  box-shadow: 0 0 10px rgba(34, 197, 94, .8);
+}
+.log-dot.is-big {
+  background: var(--gold-500);
+  box-shadow: 0 0 10px rgba(212, 160, 23, .85);
+}
+
+.log-amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.log-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+  border: 1px solid rgba(212, 160, 23, .4);
+  border-radius: 20px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+.log-time {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.log-del {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.log-del:hover {
+  background: rgba(212, 160, 23, .16);
+  color: var(--gold-400);
+}
+
+.log-empty {
+  padding: 18px 15px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  border-top: 1px solid rgba(140, 180, 255, .08);
+}
+
+/* ============================================================
+   МОДАЛКА
+   ============================================================ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+.modal[hidden] { display: none; }
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 16, .72);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  padding: 22px 20px 20px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #0d1f42 0%, #081228 100%);
+  box-shadow: 0 36px 80px -34px #000, inset 0 1px 0 rgba(255, 255, 255, .06);
+  animation: pop .22s cubic-bezier(.2, .9, .3, 1.2);
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  margin-bottom: 18px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.modal-panel .amount-input {
+  font-size: 21px;
+  padding: 13px 16px;
+}
+
+.modal-hint {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  min-height: 18px;
+}
+.modal-hint b { color: var(--green-300); font-weight: 600; }
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.modal-actions .submit-btn { flex: 1 1 auto; }
+
+.btn-ghost {
+  flex: 0 0 auto;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.btn-ghost:hover {
+  background: rgba(27, 58, 107,.6);
+  color: var(--text);
+}
+
+/* ============================================================
+   АДАПТИВНОСТЬ
+   ============================================================ */
+max-width: 380px {
+  .app { padding-left: 12px; padding-right: 12px; }
+  .today-card { padding: 20px 14px 18px; border-radius: 22px; }
+  .today-amount { font-size: clamp(34px, 12.5vw, 50px); }
+  .amount-input { font-size: 21px; padding: 14px 15px; }
+  .stat-value { font-size: 15.5px; }
+  .log-item { font-size: 14px; padding: 10px 12px; }
+}
+
+min-width: 560px {
+  .today-card { padding: 30px 24px 26px; }
+  .stat-value { font-size: 18px; }
+}
+
+max-height: 680px {
+  .today-card { padding-top: 18px; padding-bottom: 16px; }
+  .today-label { margin-top: 12px; }
+  .bottom { margin-top: 16px; }
+}
+
+prefers-reduced-motion: reduce {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+  }
+}
