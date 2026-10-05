@@ -1,10 +1,10 @@
 (function () {
-  'use strict';
+  "use strict";
 
   /* ============================================================
      КОНСТАНТЫ
      ============================================================ */
-  const STORAGE_KEY = 'daily-budget-v1';
+  const STORAGE_KEY = "daily-budget-v1";
   const LARGE_RATIO = 0.2; // 20% месячного бюджета
 
   /* ============================================================
@@ -19,37 +19,47 @@
         const parsed = JSON.parse(raw);
         return {
           budget: Number(parsed.budget) || 0,
-          expenses: (parsed.expenses && typeof parsed.expenses === 'object')
-            ? parsed.expenses
-            : {}
+          expenses:
+            parsed.expenses && typeof parsed.expenses === "object"
+              ? parsed.expenses
+              : {},
         };
       }
-    } catch (e) { /* повреждённые данные — начинаем заново */ }
+    } catch (e) {
+      /* повреждённые данные — начинаем заново */
+    }
     return { budget: 0, expenses: {} };
   }
 
   function persist() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) { /* переполнение / приватный режим */ }
+    } catch (e) {
+      /* переполнение / приватный режим */
+    }
   }
 
   /* ============================================================
      УТИЛИТЫ
      ============================================================ */
-  const nf = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
-  const money = (n) => nf.format(Math.round(n)) + ' ₽';
+  const nf = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
+  const money = (n) => nf.format(Math.round(n)) + " ₽";
 
-  const pad2 = (n) => String(n).padStart(2, '0');
-  const keyOf = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const keyOf = (d) =>
+    `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
   const daysIn = (y, m) => new Date(y, m + 1, 0).getDate();
-  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const uid = () =>
+    Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
-  const dateFmt = new Intl.DateTimeFormat('ru-RU', {
-    weekday: 'long', day: 'numeric', month: 'long'
+  const dateFmt = new Intl.DateTimeFormat("ru-RU", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   });
-  const timeFmt = new Intl.DateTimeFormat('ru-RU', {
-    hour: '2-digit', minute: '2-digit'
+  const timeFmt = new Intl.DateTimeFormat("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
   const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -60,24 +70,25 @@
   const $ = (id) => document.getElementById(id);
 
   const els = {
-    todayDate:   $('todayDate'),
-    todayAmount: $('todayAmount'),
-    todayNote:   $('todayNote'),
-    todayLeft:   $('todayLeft'),
-    form:        $('spendForm'),
-    input:       $('amountInput'),
-    spentToday:  $('spentToday'),
-    monthLeft:   $('monthLeft'),
-    dailyBase:   $('dailyBase'),
-    daysLeft:    $('daysLeft'),
-    logList:     $('logList'),
-    logTotal:    $('logTotal'),
-    settingsBtn: $('settingsBtn'),
-    modal:       $('settingsModal'),
-    budgetInput: $('budgetInput'),
-    monthInfo:   $('monthInfo'),
-    saveSettings:$('saveSettings'),
-    todayCard:   $('todayCard')
+    todayDate: $("todayDate"),
+    todayAmount: $("todayAmount"),
+    todayNote: $("todayNote"),
+    todayLeft: $("todayLeft"),
+    form: $("spendForm"),
+    input: $("amountInput"),
+    spentToday: $("spentToday"),
+    monthLeft: $("monthLeft"),
+    dailyBase: $("dailyBase"),
+    daysLeft: $("daysLeft"),
+    logList: $("logList"),
+    logTotal: $("logTotal"),
+    settingsBtn: $("settingsBtn"),
+    modal: $("settingsModal"),
+    budgetInput: $("budgetInput"),
+    monthInfo: $("monthInfo"),
+    saveSettings: $("saveSettings"),
+    todayCard: $("todayCard"),
+    resetBtn: $("resetBtn"),
   };
 
   /* ============================================================
@@ -144,10 +155,10 @@
       if (rem >= 0) {
         carry = rem; // положительный остаток переносится
       } else {
-        carry = 0;   // отрицательный — распределяем по оставшимся дням
+        carry = 0; // отрицательный — распределяем по оставшимся дням
         const rest = N - d;
         if (rest > 0) {
-          const cut = (-rem) / rest;
+          const cut = -rem / rest;
           for (let k = d + 1; k <= N; k++) base[k] -= cut;
         }
       }
@@ -171,31 +182,33 @@
 
     const calc = computeMonth(state.budget, y, m);
 
-    const avail      = calc.available[today] || 0;
+    const avail = calc.available[today] || 0;
     const spentSmall = calc.small[today] || 0;
     const spentLarge = calc.large[today] || 0;
-    const left       = avail - spentSmall;
+    const left = avail - spentSmall;
 
     /* ---------- Верхняя зона ---------- */
     els.todayDate.textContent = capitalize(dateFmt.format(now));
     els.todayAmount.textContent = money(avail);
-    els.todayAmount.classList.toggle('is-negative', avail < 0);
+    els.todayAmount.classList.toggle("is-negative", avail < 0);
 
     if (state.budget <= 0) {
-      els.todayNote.textContent = 'Укажите бюджет месяца в настройках';
+      els.todayNote.textContent = "Укажите бюджет месяца в настройках";
     } else {
       const baseToday = calc.base[today] || 0;
       const carryIn = avail - baseToday;
       const parts = [`база ${money(baseToday)}`];
       if (Math.abs(carryIn) >= 1) {
-        parts.push(`${carryIn >= 0 ? 'перенос +' : 'перенос −'}${money(Math.abs(carryIn))}`);
+        parts.push(
+          `${carryIn >= 0 ? "перенос +" : "перенос −"}${money(Math.abs(carryIn))}`,
+        );
       }
-      els.todayNote.textContent = parts.join('  ·  ');
+      els.todayNote.textContent = parts.join("  ·  ");
     }
 
     /* ---------- Строка-подсказка над полем ---------- */
     els.todayLeft.textContent = money(left);
-    els.todayLeft.classList.toggle('is-negative', left < 0);
+    els.todayLeft.classList.toggle("is-negative", left < 0);
 
     /* ---------- Нижняя зона ---------- */
     els.spentToday.textContent = money(spentSmall + spentLarge);
@@ -203,7 +216,7 @@
     const monthSpent = totalSpentForMonth(y, m);
     const monthRest = state.budget - monthSpent;
     els.monthLeft.textContent = money(monthRest);
-    els.monthLeft.classList.toggle('is-negative', monthRest < 0);
+    els.monthLeft.classList.toggle("is-negative", monthRest < 0);
 
     els.dailyBase.textContent = money(calc.D);
     els.daysLeft.textContent = String(Math.max(0, calc.N - today + 1));
@@ -228,7 +241,7 @@
 
     if (!list || !list.length) {
       els.logList.innerHTML = '<li class="log-empty">Сегодня ещё нет трат</li>';
-      els.logTotal.textContent = '';
+      els.logTotal.textContent = "";
       return;
     }
 
@@ -240,19 +253,21 @@
 
     const sorted = list.slice().sort((a, b) => (b.t || 0) - (a.t || 0));
 
-    els.logList.innerHTML = sorted.map((item) => {
-      const isBig = item.amount > threshold;
-      const time = item.t ? timeFmt.format(new Date(item.t)) : '';
-      return (
-        '<li class="log-item">' +
-          `<span class="log-dot${isBig ? ' is-big' : ''}"></span>` +
+    els.logList.innerHTML = sorted
+      .map((item) => {
+        const isBig = item.amount > threshold;
+        const time = item.t ? timeFmt.format(new Date(item.t)) : "";
+        return (
+          '<li class="log-item">' +
+          `<span class="log-dot${isBig ? " is-big" : ""}"></span>` +
           `<span class="log-amount">${money(item.amount)}</span>` +
-          (isBig ? '<span class="log-badge">крупная</span>' : '') +
+          (isBig ? '<span class="log-badge">крупная</span>' : "") +
           `<span class="log-time">${time}</span>` +
           `<button class="log-del" type="button" data-id="${item.id}" aria-label="Удалить">×</button>` +
-        '</li>'
-      );
-    }).join('');
+          "</li>"
+        );
+      })
+      .join("");
   }
 
   /* ============================================================
@@ -265,7 +280,7 @@
     state.expenses[key].push({
       id: uid(),
       amount: amount,
-      t: Date.now()
+      t: Date.now(),
     });
 
     persist();
@@ -274,31 +289,31 @@
   }
 
   function pulse() {
-    els.todayAmount.classList.remove('pulse');
+    els.todayAmount.classList.remove("pulse");
     void els.todayAmount.offsetWidth;
-    els.todayAmount.classList.add('pulse');
+    els.todayAmount.classList.add("pulse");
   }
 
   function shake(el) {
-    el.classList.remove('shake');
+    el.classList.remove("shake");
     void el.offsetWidth;
-    el.classList.add('shake');
-    setTimeout(() => el.classList.remove('shake'), 420);
+    el.classList.add("shake");
+    setTimeout(() => el.classList.remove("shake"), 420);
   }
 
-  const digitsOnly = (value) => value.replace(/[^\d]/g, '');
+  const digitsOnly = (value) => value.replace(/[^\d]/g, "");
 
   /* ============================================================
      СОБЫТИЯ
      ============================================================ */
 
   /* --- ввод суммы --- */
-  els.input.addEventListener('input', () => {
+  els.input.addEventListener("input", () => {
     const clean = digitsOnly(els.input.value);
     if (clean !== els.input.value) els.input.value = clean;
   });
 
-  els.form.addEventListener('submit', (e) => {
+  els.form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const amount = parseInt(digitsOnly(els.input.value), 10);
@@ -310,13 +325,13 @@
     }
 
     addExpense(amount);
-    els.input.value = '';
+    els.input.value = "";
     els.input.focus();
   });
 
   /* --- удаление записи --- */
-  els.logList.addEventListener('click', (e) => {
-    const btn = e.target.closest('.log-del');
+  els.logList.addEventListener("click", (e) => {
+    const btn = e.target.closest(".log-del");
     if (!btn) return;
 
     const key = keyOf(new Date());
@@ -335,7 +350,8 @@
 
   /* --- настройки --- */
   function openSettings() {
-    els.budgetInput.value = state.budget > 0 ? String(Math.round(state.budget)) : '';
+    els.budgetInput.value =
+      state.budget > 0 ? String(Math.round(state.budget)) : "";
     updateMonthInfo();
     els.modal.hidden = false;
     setTimeout(() => els.budgetInput.focus(), 40);
@@ -366,36 +382,65 @@
       `Траты больше <b>${money(largeLimit)}</b> считаются крупными и распределяются по остатку месяца.`;
   }
 
-  els.settingsBtn.addEventListener('click', openSettings);
+  els.settingsBtn.addEventListener("click", openSettings);
 
-  els.budgetInput.addEventListener('input', () => {
+  els.budgetInput.addEventListener("input", () => {
     const clean = digitsOnly(els.budgetInput.value);
     if (clean !== els.budgetInput.value) els.budgetInput.value = clean;
     updateMonthInfo();
   });
 
-  els.saveSettings.addEventListener('click', () => {
+  els.saveSettings.addEventListener("click", () => {
     const value = parseInt(digitsOnly(els.budgetInput.value), 10);
-    state.budget = (value && value > 0) ? value : 0;
+    state.budget = value && value > 0 ? value : 0;
     persist();
     closeSettings();
     render();
   });
 
-  els.budgetInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+  /* --- сброс к заводским настройкам --- */
+  els.resetBtn.addEventListener("click", () => {
+    const ok = window.confirm(
+      "Удалить всю историю трат и сбросить бюджет?\nЭто действие нельзя отменить.",
+    );
+    if (!ok) return;
+
+    // полный сброс состояния
+    state = { budget: 0, expenses: {} };
+
+    // очищаем само хранилище (на случай лишних ключей)
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+
+    persist();
+    closeSettings();
+    render();
+
+    // фокус обратно на ввод суммы
+    setTimeout(() => {
+      try {
+        els.input.focus({ preventScroll: true });
+      } catch (e) {
+        els.input.focus();
+      }
+    }, 60);
+  });
+
+  els.budgetInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
       e.preventDefault();
       els.saveSettings.click();
     }
   });
 
   /* --- закрытие модалки --- */
-  els.modal.addEventListener('click', (e) => {
-    if (e.target.closest('[data-close]')) closeSettings();
+  els.modal.addEventListener("click", (e) => {
+    if (e.target.closest("[data-close]")) closeSettings();
   });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !els.modal.hidden) closeSettings();
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !els.modal.hidden) closeSettings();
   });
 
   /* ============================================================
@@ -406,7 +451,11 @@
   // Автофокус на поле ввода
   setTimeout(() => {
     if (!els.modal.hidden) return;
-    try { els.input.focus({ preventScroll: true }); } catch (e) { els.input.focus(); }
+    try {
+      els.input.focus({ preventScroll: true });
+    } catch (e) {
+      els.input.focus();
+    }
   }, 80);
 
   // Смена суток / возврат на вкладку
@@ -414,9 +463,9 @@
     if (keyOf(new Date()) !== lastKey) render();
   }, 30000);
 
-  document.addEventListener('visibilitychange', () => {
+  document.addEventListener("visibilitychange", () => {
     if (!document.hidden) render();
   });
 
-  window.addEventListener('focus', render);
+  window.addEventListener("focus", render);
 })();

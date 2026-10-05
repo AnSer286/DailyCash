@@ -1,118 +1,152 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#04091a" />
-  <meta name="description" content="Дневной бюджет — учёт трат с переносом остатка и распределением крупных покупок" />
-  <title>Дневной бюджет</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>" />
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#04091a" />
+    <meta
+      name="description"
+      content="Дневной бюджет — учёт трат с переносом остатка и распределением крупных покупок"
+    />
+    <title>Дневной бюджет</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <!-- ================= ВЕРХНЯЯ ПАНЕЛЬ ================= -->
+      <header class="topbar">
+        <div class="brand">Дневной бюджет</div>
+        <button
+          class="icon-btn"
+          id="settingsBtn"
+          type="button"
+          aria-label="Настройки"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+            ></path>
+          </svg>
+        </button>
+      </header>
 
-  <div class="app">
-
-    <!-- ================= ВЕРХНЯЯ ПАНЕЛЬ ================= -->
-    <header class="topbar">
-      <div class="brand">Дневной бюджет</div>
-      <button class="icon-btn" id="settingsBtn" type="button" aria-label="Настройки">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-      </button>
-    </header>
-
-    <main class="main">
-
-      <!-- ================= ВЕРХНЯЯ ЗОНА: БЮДЖЕТ НА СЕГОДНЯ ================= -->
-      <section class="today-card" id="todayCard">
-        <div class="today-date" id="todayDate">—</div>
-        <div class="today-label">Бюджет на сегодня</div>
-        <div class="today-amount" id="todayAmount">—</div>
-        <div class="today-note" id="todayNote">Укажите бюджет месяца в настройках</div>
-      </section>
-
-      <!-- ================= СРЕДНЯЯ ЗОНА: ВВОД СУММЫ ================= -->
-      <section class="input-section">
-        <label class="hint" for="amountInput">
-          Остаток на сегодня: <strong id="todayLeft">—</strong>
-        </label>
-
-        <form id="spendForm" autocomplete="off" novalidate>
-          <input
-            id="amountInput"
-            class="amount-input"
-            type="text"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            placeholder="Введите сумму"
-            aria-label="Сумма траты"
-            autofocus
-          />
-          <button class="submit-btn" type="submit">Добавить трату</button>
-        </form>
-      </section>
-
-      <!-- ================= НИЖНЯЯ ЗОНА ================= -->
-      <section class="bottom">
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-label">Потрачено сегодня</div>
-            <div class="stat-value" id="spentToday">0 ₽</div>
+      <main class="main">
+        <!-- ================= ВЕРХНЯЯ ЗОНА: БЮДЖЕТ НА СЕГОДНЯ ================= -->
+        <section class="today-card" id="todayCard">
+          <div class="today-date" id="todayDate">—</div>
+          <div class="today-label">Бюджет на сегодня</div>
+          <div class="today-amount" id="todayAmount">—</div>
+          <div class="today-note" id="todayNote">
+            Укажите бюджет месяца в настройках
           </div>
-          <div class="stat">
-            <div class="stat-label">Остаток на месяц</div>
-            <div class="stat-value" id="monthLeft">0 ₽</div>
+        </section>
+
+        <!-- ================= СРЕДНЯЯ ЗОНА: ВВОД СУММЫ ================= -->
+        <section class="input-section">
+          <label class="hint" for="amountInput">
+            Остаток на сегодня: <strong id="todayLeft">—</strong>
+          </label>
+
+          <form id="spendForm" autocomplete="off" novalidate>
+            <input
+              id="amountInput"
+              class="amount-input"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              placeholder="Введите сумму"
+              aria-label="Сумма траты"
+              autofocus
+            />
+            <button class="submit-btn" type="submit">Добавить трату</button>
+          </form>
+        </section>
+
+        <!-- ================= НИЖНЯЯ ЗОНА ================= -->
+        <section class="bottom">
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">Потрачено сегодня</div>
+              <div class="stat-value" id="spentToday">0 ₽</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Остаток на месяц</div>
+              <div class="stat-value" id="monthLeft">0 ₽</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">База на день</div>
+              <div class="stat-value" id="dailyBase">0 ₽</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Дней осталось</div>
+              <div class="stat-value" id="daysLeft">0</div>
+            </div>
           </div>
-          <div class="stat">
-            <div class="stat-label">База на день</div>
-            <div class="stat-value" id="dailyBase">0 ₽</div>
+
+          <div class="log">
+            <div class="log-head">
+              <span>Траты за сегодня</span>
+              <span id="logTotal"></span>
+            </div>
+            <ul class="log-list" id="logList"></ul>
           </div>
-          <div class="stat">
-            <div class="stat-label">Дней осталось</div>
-            <div class="stat-value" id="daysLeft">0</div>
-          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ================= МОДАЛКА НАСТРОЕК ================= -->
+    <div class="modal" id="settingsModal" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div
+        class="modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settingsTitle"
+      >
+        <h2 class="modal-title" id="settingsTitle">Настройки</h2>
+
+        <label class="field-label" for="budgetInput">Бюджет на месяц, ₽</label>
+        <input
+          type="text"
+          id="budgetInput"
+          class="amount-input"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          placeholder="Например, 60000"
+        />
+        <p class="modal-hint" id="monthInfo"></p>
+
+        <button type="button" class="danger-link" id="resetBtn">
+          Удалить историю
+        </button>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" data-close>Отмена</button>
+          <button type="button" class="submit-btn" id="saveSettings">
+            Сохранить
+          </button>
         </div>
-
-        <div class="log">
-          <div class="log-head">
-            <span>Траты за сегодня</span>
-            <span id="logTotal"></span>
-          </div>
-          <ul class="log-list" id="logList"></ul>
-        </div>
-      </section>
-
-    </main>
-  </div>
-
-  <!-- ================= МОДАЛКА НАСТРОЕК ================= -->
-  <div class="modal" id="settingsModal" hidden>
-    <div class="modal-backdrop" data-close></div>
-    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-      <h2 class="modal-title" id="settingsTitle">Настройки</h2>
-
-      <label class="field-label" for="budgetInput">Бюджет на месяц, ₽</label>
-      <input
-        type="text"
-        id="budgetInput"
-        class="amount-input"
-        inputmode="numeric"
-        pattern="[0-9]*"
-        placeholder="Например, 60000"
-      />
-      <p class="modal-hint" id="monthInfo"></p>
-
-      <div class="modal-actions">
-        <button type="button" class="btn-ghost" data-close>Отмена</button>
-        <button type="button" class="submit-btn" id="saveSettings">Сохранить</button>
       </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
