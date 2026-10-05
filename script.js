@@ -216,8 +216,8 @@
 
     /* ---------- Верхняя зона ---------- */
     els.todayDate.textContent = capitalize(dateFmt.format(now));
-    els.todayAmount.textContent = money(avail);
-    els.todayAmount.classList.toggle("is-negative", avail < 0);
+    els.todayAmount.textContent = money(left);
+    els.todayAmount.classList.toggle("is-negative", left < 0);
 
     if (state.budget <= 0) {
       els.todayNote.textContent = "Укажите бюджет месяца в настройках";
@@ -253,8 +253,8 @@
     }
 
     /* ---------- Строка-подсказка над полем ---------- */
-    els.todayLeft.textContent = money(left);
-    els.todayLeft.classList.toggle("is-negative", left < 0);
+    els.todayLeft.textContent = money(avail);
+    els.todayLeft.classList.toggle("is-negative", avail < 0);
 
     /* ---------- Нижняя зона ---------- */
     els.spentToday.textContent = money(spentSmall + spentLarge);
@@ -462,24 +462,30 @@
   });
 
   /* --- сброс к заводским настройкам --- */
-  els.resetBtn.addEventListener('click', () => {
-  const ok = window.confirm(
-    'Удалить всю историю трат и сбросить бюджет?\nЭто действие нельзя отменить.'
-  );
-  if (!ok) return;
+  els.resetBtn.addEventListener("click", () => {
+    const ok = window.confirm(
+      "Удалить всю историю трат и сбросить бюджет?\nЭто действие нельзя отменить.",
+    );
+    if (!ok) return;
 
-  state = { budget: 0, expenses: {}, distributeDays: [] };
+    state = { budget: 0, expenses: {}, distributeDays: [] };
 
-  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
 
-  persist();
-  closeSettings();
-  render();
+    persist();
+    closeSettings();
+    render();
 
-  setTimeout(() => {
-    try { els.input.focus({ preventScroll: true }); } catch (e) { els.input.focus(); }
-  }, 60);
-});
+    setTimeout(() => {
+      try {
+        els.input.focus({ preventScroll: true });
+      } catch (e) {
+        els.input.focus();
+      }
+    }, 60);
+  });
 
   els.budgetInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
