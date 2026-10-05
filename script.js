@@ -23,12 +23,15 @@
             parsed.expenses && typeof parsed.expenses === "object"
               ? parsed.expenses
               : {},
+          distributeDays: Array.isArray(parsed.distributeDays)
+            ? parsed.distributeDays
+            : [],
         };
       }
     } catch (e) {
       /* повреждённые данные — начинаем заново */
     }
-    return { budget: 0, expenses: {} };
+    return { budget: 0, expenses: {}, distributeDays: [] };
   }
 
   function persist() {
@@ -89,6 +92,7 @@
     saveSettings: $("saveSettings"),
     todayCard: $("todayCard"),
     resetBtn: $("resetBtn"),
+    distributeBtn: $("distributeBtn"),
   };
 
   /* ============================================================
@@ -113,17 +117,15 @@
     const prefix = `${year}-${pad2(month + 1)}-`;
     const threshold = budget > 0 ? budget * LARGE_RATIO : Infinity;
 
-    const small = new Array(N + 2).fill(0); // обычные траты по дням
-    const large = new Array(N + 2).fill(0); // крупные траты по дням
+    const small = new Array(N + 2).fill(0);
+    const large = new Array(N + 2).fill(0);
 
     for (const key in state.expenses) {
       if (!key.startsWith(prefix)) continue;
       const day = parseInt(key.slice(prefix.length), 10);
       if (!(day >= 1 && day <= N)) continue;
-
       const list = state.expenses[key];
       if (!Array.isArray(list)) continue;
-
       for (const item of list) {
         const amt = Number(item && item.amount) || 0;
         if (amt <= 0) continue;
@@ -132,30 +134,46 @@
       }
     }
 
+    const distributeSet = new Set(state.distributeDays || []);
+
     const base = new Array(N + 2).fill(D);
     const available = new Array(N + 2).fill(0);
+    const incomingCarry = new Array(N + 2).fill(0); // перенос, пришедший в день
+    const distributeFlags = new Array(N + 2).fill(false); // активен ли сброс на день
 
     let carry = 0;
 
     for (let d = 1; d <= N; d++) {
-      /* --- 1. крупные траты дня раскидываем на оставшиеся дни --- */
+      incomingCarry[d] = carry;
+
+      /* 1. крупные траты дня — раскидываем на оставшиеся дни */
       if (large[d] > 0) {
         const rest = N - d + 1;
         const cut = large[d] / rest;
         for (let k = d; k <= N; k++) base[k] -= cut;
       }
 
-      /* --- 2. доступно на день --- */
+      /* 1.5. если включено распределение — размазываем carry по дням d..N */
+      const key = `${prefix}${pad2(d)}`;
+      if (distributeSet.has(key) && carry !== 0) {
+        const rest = N - d + 1;
+        const cut = carry / rest;
+        for (let k = d; k <= N; k++) base[k] += cut;
+        distributeFlags[d] = true;
+        carry = 0;
+      }
+
+      /* 2. доступно на день */
       const avail = base[d] + carry;
       available[d] = avail;
 
-      /* --- 3. остаток дня --- */
+      /* 3. остаток дня */
       const rem = avail - small[d];
 
       if (rem >= 0) {
-        carry = rem; // положительный остаток переносится
+        carry = rem;
       } else {
-        carry = 0; // отрицательный — распределяем по оставшимся дням
+        carry = 0;
         const rest = N - d;
         if (rest > 0) {
           const cut = -rem / rest;
@@ -164,7 +182,16 @@
       }
     }
 
-    return { N, D, base, available, small, large };
+    return {
+      N,
+      D,
+      base,
+      available,
+      small,
+      large,
+      incomingCarry,
+      distributeFlags,
+    };
   }
 
   /* ============================================================
@@ -194,16 +221,35 @@
 
     if (state.budget <= 0) {
       els.todayNote.textContent = "Укажите бюджет месяца в настройках";
+      els.distributeBtn.hidden = true;
     } else {
       const baseToday = calc.base[today] || 0;
-      const carryIn = avail - baseToday;
+      const carryIn = calc.incomingCarry[today] || 0;
+      const isDist = calc.distributeFlags[today];
+
       const parts = [`база ${money(baseToday)}`];
-      if (Math.abs(carryIn) >= 1) {
+      if (isDist) {
+        parts.push("остаток распределён");
+      } else if (Math.abs(carryIn) >= 1) {
         parts.push(
           `${carryIn >= 0 ? "перенос +" : "перенос −"}${money(Math.abs(carryIn))}`,
         );
       }
       els.todayNote.textContent = parts.join("  ·  ");
+
+      /* --- ссылка «Распределить остаток» / «Вернуть перенос» --- */
+      const canDistribute = !isDist && Math.abs(carryIn) >= 1;
+      const canUndo = isDist;
+
+      if (canDistribute || canUndo) {
+        els.distributeBtn.hidden = false;
+        els.distributeBtn.textContent = canUndo
+          ? "Вернуть перенос"
+          : "Распределить остаток";
+        els.distributeBtn.classList.toggle("is-active", canUndo);
+      } else {
+        els.distributeBtn.hidden = true;
+      }
     }
 
     /* ---------- Строка-подсказка над полем ---------- */
@@ -218,7 +264,7 @@
     els.monthLeft.textContent = money(monthRest);
     els.monthLeft.classList.toggle("is-negative", monthRest < 0);
 
-    els.dailyBase.textContent = money(calc.D);
+    els.dailyBase.textContent = money(calc.base[today] || 0);
     els.daysLeft.textContent = String(Math.max(0, calc.N - today + 1));
 
     renderLog(key);
@@ -390,6 +436,23 @@
     updateMonthInfo();
   });
 
+  /* --- распределение переноса по оставшимся дням --- */
+  els.distributeBtn.addEventListener("click", () => {
+    const key = keyOf(new Date());
+    if (!Array.isArray(state.distributeDays)) state.distributeDays = [];
+
+    const idx = state.distributeDays.indexOf(key);
+    if (idx === -1) {
+      state.distributeDays.push(key);
+    } else {
+      state.distributeDays.splice(idx, 1);
+    }
+
+    persist();
+    render();
+    pulse();
+  });
+
   els.saveSettings.addEventListener("click", () => {
     const value = parseInt(digitsOnly(els.budgetInput.value), 10);
     state.budget = value && value > 0 ? value : 0;
@@ -399,33 +462,24 @@
   });
 
   /* --- сброс к заводским настройкам --- */
-  els.resetBtn.addEventListener("click", () => {
-    const ok = window.confirm(
-      "Удалить всю историю трат и сбросить бюджет?\nЭто действие нельзя отменить.",
-    );
-    if (!ok) return;
+  els.resetBtn.addEventListener('click', () => {
+  const ok = window.confirm(
+    'Удалить всю историю трат и сбросить бюджет?\nЭто действие нельзя отменить.'
+  );
+  if (!ok) return;
 
-    // полный сброс состояния
-    state = { budget: 0, expenses: {} };
+  state = { budget: 0, expenses: {}, distributeDays: [] };
 
-    // очищаем само хранилище (на случай лишних ключей)
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {}
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
 
-    persist();
-    closeSettings();
-    render();
+  persist();
+  closeSettings();
+  render();
 
-    // фокус обратно на ввод суммы
-    setTimeout(() => {
-      try {
-        els.input.focus({ preventScroll: true });
-      } catch (e) {
-        els.input.focus();
-      }
-    }, 60);
-  });
+  setTimeout(() => {
+    try { els.input.focus({ preventScroll: true }); } catch (e) { els.input.focus(); }
+  }, 60);
+});
 
   els.budgetInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {

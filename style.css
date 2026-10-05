@@ -239,6 +239,49 @@ body::after {
   min-height: 17px;
 }
 
+/* ---------- Ссылка «Распределить остаток» ---------- */
+.distribute-link {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+  padding: 3px 0;
+  border: none;
+  background: transparent;
+  color: var(--green-300);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: underline;
+  text-decoration-color: rgba(134, 239, 172, 0.5);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition:
+    color 0.18s,
+    text-decoration-color 0.18s,
+    transform 0.12s;
+}
+.distribute-link:hover {
+  color: #b8ffd0;
+  text-decoration-color: rgba(184, 255, 208, 0.95);
+}
+.distribute-link:active {
+  transform: translateY(1px);
+}
+.distribute-link[hidden] {
+  display: none;
+}
+
+/* Активное состояние — «Вернуть перенос» */
+.distribute-link.is-active {
+  color: var(--gold-400);
+  text-decoration-color: rgba(232, 195, 74, 0.5);
+}
+.distribute-link.is-active:hover {
+  color: #f5d76e;
+  text-decoration-color: rgba(245, 215, 110, 0.95);
+}
+
 /* Пульс при обновлении */
 @keyframes pulse {
   0% {
@@ -660,7 +703,7 @@ body::after {
 /* ============================================================
    АДАПТИВНОСТЬ
    ============================================================ */
-max-width: 380px {
+@media (max-width: 380px) {
   .app {
     padding-left: 12px;
     padding-right: 12px;
@@ -685,7 +728,7 @@ max-width: 380px {
   }
 }
 
-min-width: 560px {
+@media (min-width: 560px) {
   .today-card {
     padding: 30px 24px 26px;
   }
@@ -694,7 +737,7 @@ min-width: 560px {
   }
 }
 
-max-height: 680px {
+@media (max-height: 680px) {
   .today-card {
     padding-top: 18px;
     padding-bottom: 16px;
@@ -707,7 +750,7 @@ max-height: 680px {
   }
 }
 
-prefers-reduced-motion: reduce {
+@media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
